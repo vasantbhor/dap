@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deposit Management System — Premium Portfolio Tracking</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Ionicons -->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <style>
+        .clickable {
+            color: var(--primary-light);
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .clickable:hover {
+            color: var(--accent);
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            padding: 24px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-close {
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .detail-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .detail-value {
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <div class="logo-icon"></div>
+            <span class="logo-text">DepositPro</span>
+        </div>
+        <ul class="nav-links">
+            <li class="nav-item active" data-view="dashboard">
+                <ion-icon name="grid-outline"></ion-icon>
+                Dashboard
+            </li>
+            <li class="nav-item" data-view="new-deposit">
+                <ion-icon name="add-circle-outline"></ion-icon>
+                Open Deposit
+            </li>
+            <li class="nav-item" data-view="maturity-report">
+                <ion-icon name="list-outline"></ion-icon>
+                Maturity Report
+            </li>
+            <li class="nav-item" data-view="upcoming-maturities">
+                <ion-icon name="notifications-outline"></ion-icon>
+                Upcoming Maturities
+            </li>
+            <li class="nav-item" data-view="interest-report">
+                <ion-icon name="trending-up-outline"></ion-icon>
+                Interest Report
+            </li>
+            <li class="nav-item" data-view="customer-report">
+                <ion-icon name="people-outline"></ion-icon>
+                Customer Report
+            </li>
+            <li class="nav-item" data-view="settings">
+                <ion-icon name="settings-outline"></ion-icon>
+                Backup & Settings
+            </li>
+        </ul>
+    </div>
+
+    <main class="main-content">
+        <!-- Dashboard View -->
+        <section id="dashboard" class="view">
+            <div class="header">
+                <h1>Dashboard</h1>
+                <p>Welcome back! Here's an overview of your deposits.</p>
+            </div>
+            <div class="dashboard-grid">
+                <div class="card">
+                    <p class="text-secondary">Total Investment</p>
+                    <h2 id="total-investment">₹0.00</h2>
+                </div>
+                <div class="card">
+                    <p class="text-secondary">Total Interest</p>
+                    <h2 id="total-interest">₹0.00</h2>
+                </div>
+                <div class="card">
+                    <p class="text-secondary">Active Deposits</p>
+                    <h2 id="active-deposits">0</h2>
+                </div>
+                <div class="card">
+                    <p class="text-secondary">Next Maturity</p>
+                    <h2 id="next-maturity">--</h2>
+                </div>
+            </div>
+        </section>
+
+        <!-- New Deposit View -->
+        <section id="new-deposit" class="view" style="display: none;">
+            <div class="header">
+                <h1>Open New Deposit</h1>
+                <p>Enter the details for your new fixed deposit.</p>
+            </div>
+            <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 24px; align-items: start;">
+                <div class="card">
+                    <form id="deposit-form" class="form-grid">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div class="form-group">
+                                <label>Customer Name</label>
+                                <input type="text" id="dep-customer" placeholder="John Doe" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Deposit Name / Reference</label>
+                                <input type="text" id="dep-name" placeholder="SBI FD - 1234" required>
+                            </div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
+                            <div class="form-group">
+                                <label>Deposit Type</label>
+                                <select id="dep-type">
+                                    <option value="FD">Fixed Deposit (FD)</option>
+                                    <option value="RD">Recurring Deposit (RD)</option>
+                                    <option value="DD">Damduppat (DD)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Account Number</label>
+                                <input type="text" id="dep-acc-no" placeholder="9876543210" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Principal Amount (₹)</label>
+                                <input type="number" id="dep-amount" placeholder="50000" required>
+                            </div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
+                            <div class="form-group">
+                                <label>Interest Rate (%)</label>
+                                <input type="number" step="0.01" id="dep-rate" placeholder="7.5" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Start Date</label>
+                                <input type="date" id="dep-start" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Duration (Months)</label>
+                                <input type="number" id="dep-months" placeholder="12" required>
+                            </div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div class="form-group" id="compounding-group">
+                                <label>Compounding Frequency</label>
+                                <select id="dep-compounding">
+                                    <option value="12">Annually</option>
+                                    <option value="4" selected>Quarterly</option>
+                                    <option value="1">Monthly</option>
+                                    <option value="0">Simple Interest</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Payout Type</label>
+                                <select id="dep-payout">
+                                    <option value="maturity">At Maturity</option>
+                                    <option value="monthly">Monthly</option>
+                                    <option value="quarterly">Quarterly</option>
+                                    <option value="yearly">Yearly</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div style="margin-top: 20px;">
+                            <button type="submit" class="btn btn-primary">Save Deposit</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Live Preview Card -->
+                <div class="card" id="preview-card" style="position: sticky; top: 32px;">
+                    <h3 style="margin-bottom: 20px; color: var(--primary-light);">Live Preview</h3>
+                    <div style="display: flex; flex-direction: column; gap: 16px;">
+                        <div class="preview-item">
+                            <p class="text-secondary" style="font-size: 0.8rem;">Maturity Date</p>
+                            <h3 id="preview-maturity-date">--</h3>
+                        </div>
+                        <div class="preview-item">
+                            <p class="text-secondary" style="font-size: 0.8rem;">Interest Earned</p>
+                            <h3 id="preview-interest" style="color: var(--accent);">₹0.00</h3>
+                        </div>
+                        <div class="preview-item">
+                            <p class="text-secondary" style="font-size: 0.8rem;">Maturity Amount</p>
+                            <h3 id="preview-maturity-amount">₹0.00</h3>
+                        </div>
+                        <hr style="border: none; border-top: 1px solid var(--border); margin: 8px 0;">
+                        <div class="preview-item">
+                            <p class="text-secondary" style="font-size: 0.8rem;">Total Portfolio Interest (New Est.)</p>
+                            <h3 id="preview-portfolio-total">₹0.00</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Upcoming Maturities View -->
+        <section id="upcoming-maturities" class="view" style="display: none;">
+            <div class="header">
+                <h1>Upcoming Maturities</h1>
+                <p>Deposits nearing closure.</p>
+            </div>
+            <div class="card" style="margin-bottom: 24px;">
+                <div class="btn-row" style="display: flex; gap: 10px;">
+                    <button class="btn btn-secondary filter-mat" data-days="0">Today</button>
+                    <button class="btn btn-secondary filter-mat" data-days="10">Next 10 Days</button>
+                    <button class="btn btn-secondary filter-mat" data-days="15">Next 15 Days</button>
+                    <button class="btn btn-secondary filter-mat" data-days="30">Next 30 Days</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="table-container">
+                    <table id="upcoming-table">
+                        <thead>
+                            <tr>
+                                <th>Customer</th>
+                                <th>Deposit Name</th>
+                                <th>Maturity Date</th>
+                                <th>Proceeds</th>
+                                <th>Contact</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data will be populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+        <!-- Maturity Report View -->
+        <section id="maturity-report" class="view" style="display: none;">
+            <div class="header">
+                <h1>FD Maturity Report</h1>
+                <p>Tracking upcoming maturities and proceeds.</p>
+            </div>
+            <div class="card">
+                <div class="table-container">
+                    <table id="maturity-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Customer</th>
+                                <th>Type</th>
+                                <th>Account No</th>
+                                <th>Amount</th>
+                                <th>Maturity Date</th>
+                                <th>Status</th>
+                                <th style="text-align: right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data will be populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interest Report View -->
+        <section id="interest-report" class="view" style="display: none;">
+            <div class="header">
+                <h1>Yearly Interest Report</h1>
+                <p>Accrued interest across financial years.</p>
+            </div>
+            <div class="card">
+                <div id="yearly-interest-summary">
+                    <!-- Data will be populated by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Customer Report View -->
+        <section id="customer-report" class="view" style="display: none;">
+            <div class="header">
+                <h1>Customer-wise Report</h1>
+                <p>Consolidated view of deposits grouped by customer.</p>
+            </div>
+            <div class="card">
+                <div class="table-container">
+                    <table id="customer-table">
+                        <thead>
+                            <tr>
+                                <th>Customer Name</th>
+                                <th>Total Deposits</th>
+                                <th>Total Principal</th>
+                                <th>Total Int. Earned</th>
+                                <th>Total Maturity</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data will be populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Customer Details (Drill-down) -->
+        <section id="customer-details" class="view" style="display: none;">
+            <div class="header">
+                <button class="btn btn-secondary btn-sm"
+                    onclick="document.querySelector('[data-view=\'customer-report\']').click()"
+                    style="margin-bottom: 15px;">
+                    <ion-icon name="arrow-back-outline"></ion-icon> Back to Customers
+                </button>
+                <h1 id="details-customer-name">Customer Details</h1>
+                <p>Showing all deposits for this customer.</p>
+            </div>
+            <div class="card">
+                <div class="table-container">
+                    <table id="customer-details-table">
+                        <thead>
+                            <tr>
+                                <th>Account No</th>
+                                <th>Deposit Name</th>
+                                <th>Type</th>
+                                <th>Amount</th>
+                                <th>Interest</th>
+                                <th>Maturity Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Settings / Backup View -->
+        <section id="settings" class="view" style="display: none;">
+            <div class="header">
+                <h1>Backup & Settings</h1>
+                <p>Manage your data and application preferences.</p>
+            </div>
+            <div class="dashboard-grid">
+                <div class="card">
+                    <ion-icon name="cloud-download-outline"
+                        style="font-size: 2rem; color: var(--primary-light);"></ion-icon>
+                    <h3 style="margin-top: 10px;">Export Backup</h3>
+                    <p class="text-secondary" style="margin: 10px 0;">Download all your deposit data as a JSON file.</p>
+                    <button class="btn btn-primary" id="btn-export">Export Data</button>
+                </div>
+                <div class="card">
+                    <ion-icon name="cloud-upload-outline" style="font-size: 2rem; color: var(--accent);"></ion-icon>
+                    <h3 style="margin-top: 10px;">Restore Backup</h3>
+                    <p class="text-secondary" style="margin: 10px 0;">Upload a previously exported JSON file to restore
+                        data.</p>
+                    <input type="file" id="import-file" style="display: none;" accept=".json">
+                    <button class="btn btn-secondary" onclick="document.getElementById('import-file').click()">Select
+                        File</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Deposit Detail Modal -->
+    <div id="deposit-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Deposit Details</h3>
+                <ion-icon name="close-outline" class="modal-close" onclick="closeModal()"></ion-icon>
+            </div>
+            <div id="modal-content">
+                <!-- Populated by JS -->
+            </div>
+            <div style="margin-top: 24px; text-align: right;">
+                <button class="btn btn-primary" onclick="closeModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/calculations.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>
